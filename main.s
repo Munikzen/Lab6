@@ -13,7 +13,6 @@
 	.cpu cortex-m3      @ Generates Cortex-M3 instructions
 	.syntax unified
 
-	.include "ivt.s"
 	.include "gpio_map.inc"
 	.include "rcc_map.inc"
 	.include "systick_map.inc"
@@ -110,28 +109,26 @@ __main:
     ldr     r2, =0x33333333
     str     r2, [r0, GPIOx_CRH_OFFSET]
 
-    # set pins PA0 and PA4 as digital input
+    # set pins PA5 and PA6 as digital input
     ldr     r0, =GPIOA_BASE
-    ldr     r2, =0x44484448
+    ldr     r2, =0x48844444
     str     r2, [r0, GPIOx_CRL_OFFSET]
 
 	# configures the mapping of external interrupts lines to GPIO pins
 	ldr 	r0, =AFIO_BASE
 	eor		r1, r1
-	str 	r1, [r0, AFIO_EXTICR1_OFFSET]
 	str		r1, [r0, AFIO_EXTICR2_OFFSET]
 
 	# configures falling and rising edge triggers
 	ldr 	r0, =EXTI_BASE
-	mov		r1, #0x11
+	eor		r1, r1
 	str 	r1, [r0, EXTI_FTST_OFFSET]
-	ldr 	r1, =0x0 @ 0x0 to set PA0 and PA4 
+	ldr 	r1, =(0x3 << 5)
 	str		r1, [r0, EXTI_RTST_OFFSET]
-
 	str 	r1, [r0, EXTI_IMR_OFFSET]
 
 	ldr 	r0, =NVIC_BASE
-	ldr 	r1, =0x440 @ 0x440 to enable EXTI0 and EXTI4
+	ldr 	r1, =(0x1 << 23) @ 0x1 << 23 to enable EXTI Line[9:5]
 	str		r1, [r0, NVIC_ISER0_OFFSET] 
 
     # Set led status initial value
